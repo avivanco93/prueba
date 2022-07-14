@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>CRUD AGENDA CONTACTOS</h1>
+    <section class="crud">
+        <article>
+            <h2 class="crud-title">Agenda</h2>
+            <form class="crud-form">
+                <input type="text" name="name" placeholder="nombre" required>
+                <br>
+                <input type="text" name="phone" placeholder="Phone" required>
+                <br>
+                <input type="date" name="date" placeholder="Fecha Nacimiento" required>
+                <br>
+                <input type="text" name="address" placeholder="Dirrecion" required>
+                <br>
+                <input type="email" name="email" placeholder="Correo Electronico" required>
+                <br>
+
+                <input type="submit" value="Enviar">
+                <input type="hidden" name="id">
+            </form>
+        </article>
+        <article>
+            <h2>Ver Agenda</h2>
+            <table class="crud-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Telefono</th>
+                        <th>Fecha de nacimiento </th>
+                        <th>Dirrecion</th>
+                        <th>Correo electronico</th>
+                        
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </article>
+    </section>
+    <template id="crud-template">
+        <tr>
+            <td class="name"></td>
+            <td class="phone"></td>
+            <td class="date"></td>
+            <td class="address"></td>
+            <td class="email"></td>
+            
+        
+            <td>
+                <button class="edit">Editar</button>
+                <button class="delete">Eliminar</button>
+            </td>
+        </tr>
+    </template>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        const d = document,
+            $table = d.querySelector(".crud-table"),
+            $form = d.querySelector(".crud-form"),
+            $title = d.querySelector(".crud-title"),
+            $template = d.getElementById("crud-template").content,
+            $fragment = d.createDocumentFragment();
+
+            const getAll = async () => {
+                try {
+                    let res = await axios.get("http://localhost:5555/agendados"),
+                        json = await res.data;
+
+                     //console.log(json);   
+
+                     json.forEach(el =>{
+                            $template.querySelector(".name").textContent = el.name;
+                            $template.querySelector(".phone").textContent = el.phone;
+                            $template.querySelector(".date").textContent = el.date;
+                            $template.querySelector(".address").textContent = el.address;
+                            $template.querySelector(".email").textContent = el.email;
+                            $template.querySelector(".edit").dataset.id = el.id;
+                            $template.querySelector(".edit").dataset.name = el.name;
+                            $template.querySelector(".edit").dataset.phone = el.phone;
+                            $template.querySelector(".edit").dataset.name = el.date;
+                            $template.querySelector(".edit").dataset.address = el.address;
+                            $template.querySelector(".edit").dataset.email = el.email;
+                            $template.querySelector(".delete").dataset.id = el.id;
+                        
+                            let $clone = d.importNode($template, true);
+                            $fragment.appendChild($clone);
+                    });
+                    $table.querySelector("tbody").appendChild($fragment);
+                } catch (err) {
+                    let message = err.statusText || "Ocurrio un error";
+                    $table.insertAdjacentHTML("afterend",`<p><b>Error ${err.status}: ${message}</b></p>`);
+                }
+            }
+
+            d.addEventListener("DOMContentLoaded", getAll);
+    
+            
+
+            d.addEventListener("submit", async e =>{
+                if(e.target === $form){
+                    e.preventDefault();
+
+                    if (!e.target.id.value) {
+                        //CREATE - POST 
+                        try {
+                            let options = {
+                                method: "POST",
+                                headers:{
+                                    "Content-type": "application/json; charset=utf-8"
+                                },
+                                data: JSON.stringify({
+                                    name: e.target.name.value,
+                                    phone: e.target.phone.value,
+                                    date: e.target.date.value,
+                                    address: e.target.address.value,
+                                    email: e.target.email.value,
+                                   
+
+                                })
+                            },
+                            res = await axios("http://localhost:5555/agendados", options),
+                            json = await res.data;
+                            
+                            location.reload();
+                        } catch (err) {
+                            let message = err.statusText || "Ocurrio un error";
+                            $form.insertAdjacentHTML("afterend",`<p><b>Error ${err.status}: ${message}</b></p>`);
+                        }
+                    } else {
+                        //Update - PUT
+                        try {
+                            let options = {
+                                method: "PUT",
+                                headers:{
+                                    "Content-type": "application/json; charset=utf-8"
+                                },
+                                data: JSON.stringify({
+                                    name: e.target.name.value,
+                                    phone: e.target.phone.value,
+                                    date: e.target.date.value,
+                                    address: e.target.address.value,
+                                    email: e.target.email.value
+
+                                })
+                            },
+                            res = await axios(`http://localhost:5555/agendados/${e.target.id.value}`, options),
+                            json = await res.data;
+                            
+                            location.reload();
+                        } catch (err) {
+                            let message = err.statusText || "Ocurrio un error";
+                            $form.insertAdjacentHTML("afterend",`<p><b>Error ${err.status}: ${message}</b></p>`);
+                        }
+                    }
+                }
+            });
+            
+            d.addEventListener("click", async e =>{
+                if(e.target.matches(".edit")){
+                    $title.textContent = "Editar de la agenda";
+                    $form.name.value = e.target.dataset.name;
+                    $form.phone.value = e.target.dataset.phone;
+                    $form.date.value = e.target.dataset.date;
+                    $form.address.value = e.target.dataset.address;
+                    $form.email.value = e.target.dataset.email;
+                    $form.id.value = e.target.dataset.id;
+                }
+                if(e.target.matches(".delete")){
+                    let isDelete = confirm(`¿Estas seguro de eliminar el id ${e.target.dataset.id}?`);
+
+                    if(isDelete){
+                        //Delete - DELETE
+                        try {
+                            let options = {
+                                method: "DELETE",
+                                headers: {
+                                    "Content-type": "application/json; charset=utf-8"
+                                }
+                            },
+                            res = await axios(`http://localhost:5555/agendados/${e.target.dataset.id}`, options),
+                            json = await res.data;
+
+                            location.reload();
+                        } catch (err) {
+                            let message = err.statusText || "Ocurrio un error";
+                            alert(`Error ${err.status}: ${message}`);
+                        }
+
+                    }
+                }
+            })
+    
+    </script>
+</body>
+</html>

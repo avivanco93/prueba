@@ -1,0 +1,26 @@
+[
+    {
+    "id": 1,
+    "name": "Leanne Graham",
+    "phone": "3127678990",
+    "date": "1993-12-04",
+    "address": "Calle 55 #104-49 Torre 2 apto 503",
+    "email": "Sincere@april.biz"
+    },
+    {
+        "id": 2,
+        "name": "Ervin Howell",
+        "phone": "90566-7771",
+        "date": "1998-01-28",
+        "address": "Calle 5 #10-49",
+        "email": "Shanna@melissa.tv"
+        },
+        {
+            "id": 3,
+            "name": "Clementine Bauch",
+            "phone": "59590-4157",
+            "date": "2003-05-14",
+            "address": "Cra 101b #104-49",
+            "email": "Julianne.OConner@kory.org"
+            }
+]
